@@ -1,6 +1,6 @@
 # GPX Journey
 
-A static, browser-only web app: upload a GPX run or ride, then see the route on a map, its highlight figures, and the Australian postcodes it passed through. It's still being planned on the wayfinder map (GitHub issue labelled `wayfinder:map`).
+A static, browser-only web app: upload a GPX run or ride, then see the route on a map, its highlight figures, and the Australian postcodes it passed through. Planning is complete: decisions live in the resolution comments of the closed wayfinder map (issue #1) and its sub-issues. The build is tracked as issues #10–#20 on the "GPX Journey" project board.
 
 ## Agent skills
 
