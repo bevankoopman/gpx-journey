@@ -98,4 +98,4 @@ Source: ABS POA page, https://www.abs.gov.au/statistics/standards/australian-sta
 - When Edition 4 POA and SAL will be released.
 
 ## Reproduction
-The downloads and outputs are in the session scratchpad, not the repo: `/private/tmp/claude-501/-Users-koo01a-Documents-gpx-journey/adefcfe0-30e7-44a6-9cbc-c4c7800a2ba6/scratchpad/{poa,out}`. They were produced with `npm i mapshaper` (0.7.78) and the commands above. Test points: 10,000 per box, Sydney [150.9,-34.1,151.35,-33.7], Melbourne [144.8,-38.0,145.2,-37.7], Brisbane [152.9,-27.6,153.2,-27.3], joined with `mapshaper -points -join`.
+The downloads and outputs were kept in a temporary working directory, not the repo. They were produced with `npm i mapshaper` (0.7.78) and the commands above. Test points: 10,000 per box, Sydney [150.9,-34.1,151.35,-33.7], Melbourne [144.8,-38.0,145.2,-37.7], Brisbane [152.9,-27.6,153.2,-27.3], joined with `mapshaper -points -join`.
