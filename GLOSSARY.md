@@ -1,10 +1,12 @@
 # Glossary
 
 - **Activity** — one uploaded GPX file, a single run or ride. All tracks/segments in the file are merged into one activity.
-- **Activity type** — `running` or `cycling`. Taken from the GPX `<type>` element, else guessed from speed; the user can override it.
+- **Activity type** — `running` (shows pace) or `cycling` (shows speed). Taken from the track's own `<type>` (walks and hikes map to running; the original label is shown for information only). If that's missing: power data → cycling, else average moving speed ≥ 15 km/h → cycling. The user can override it.
 - **Highlight figures** — the summary numbers shown for an activity: distance, moving time, elapsed time, average pace (running) or average speed (cycling), elevation gain, start date/time.
-- **Elapsed time** — first timestamp to last timestamp.
-- **Moving time** — elapsed time minus pauses; the basis for average pace/speed.
+- **Elapsed time** — last timestamp minus first timestamp, across the whole file.
+- **Moving time** — time where the rolling 10 s average speed is at least 1 km/h; the basis for average pace/speed. GPX records no pauses, so moving time is always inferred.
+- **Untimed activity** — fewer than 90% of points have timestamps; only distance and elevation gain are shown.
+- **Elevation gain** — total climb after a 5 m hysteresis filter on `<ele>` (no terrain-model correction).
 - **Pace** — minutes per km (running). **Speed** — km/h (cycling).
 - **Postcode** — an Australian postal area as given by the chosen boundary dataset (expected: ABS Postal Areas, an approximation of Australia Post postcodes). _Avoid_: "suburb" (a locality, not a postcode).
 - **Postcode passed through** — a postcode with at least 50 m (tunable) of the activity's route inside its boundary, measured on the route's segments, not just its points. Listed in order of first entry. If none reaches 50 m, the start postcode counts.
