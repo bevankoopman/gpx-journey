@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { ActivityType } from './lib/analysis/activityType';
   import type { ActivitySummary } from './lib/analysis/analyseActivity';
   import { analyseInWorker } from './lib/analysis/client';
   import { CREDITS } from './lib/credits';
@@ -8,7 +9,10 @@
   import MapView from './lib/ui/MapView.svelte';
 
   type View =
-    { kind: 'upload'; error?: string } | { kind: 'analysing' } | { kind: 'result'; summary: ActivitySummary };
+    | { kind: 'upload'; error?: string }
+    | { kind: 'analysing' }
+    // The text is kept so the Run/Ride toggle can re-analyse without re-reading the file.
+    | { kind: 'result'; summary: ActivitySummary; gpxText: string };
 
   // Raw: the summary is replaced wholesale, never mutated, and a long route must not become thousands of proxies.
   let view = $state.raw<View>({ kind: 'upload' });
@@ -20,11 +24,27 @@
     const request = ++latest;
     view = { kind: 'analysing' };
     try {
-      const summary = await analyseInWorker(await file.text());
-      if (request === latest) view = { kind: 'result', summary };
+      const gpxText = await file.text();
+      const summary = await analyseInWorker(gpxText);
+      if (request === latest) view = { kind: 'result', summary, gpxText };
     } catch (err) {
       if (request === latest)
         view = { kind: 'upload', error: err instanceof Error ? err.message : String(err) };
+    }
+  }
+
+  // Re-analyse as the chosen type (pace ↔ speed and that type's spike limit); the current result stays up meanwhile.
+  async function chooseType(activityType: ActivityType) {
+    if (view.kind !== 'result') return;
+    // Invalidate any toggle still in flight first: tapping Ride then back to Run must end on Run.
+    const request = ++latest;
+    if (view.summary.activityType === activityType) return;
+    const { gpxText } = view;
+    try {
+      const summary = await analyseInWorker(gpxText, activityType);
+      if (request === latest) view = { kind: 'result', summary, gpxText };
+    } catch {
+      // Same text that already analysed; leave the current result in place.
     }
   }
 
@@ -67,7 +87,7 @@
     {:else if view.kind === 'analysing'}
       <Analysing />
     {:else}
-      <Figures summary={view.summary} />
+      <Figures summary={view.summary} onchoosetype={chooseType} />
     {/if}
     <footer>{CREDITS}</footer>
   </aside>

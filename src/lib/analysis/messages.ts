@@ -1,7 +1,8 @@
+import type { ActivityType } from './activityType';
 import type { ActivitySummary } from './analyseActivity';
 
 /** Main thread → analysis worker. */
-export type WorkerRequest = { type: 'analyse'; id: number; gpxText: string };
+export type WorkerRequest = { type: 'analyse'; id: number; gpxText: string; activityType?: ActivityType };
 
 /** Analysis worker → main thread. */
 export type WorkerResponse =

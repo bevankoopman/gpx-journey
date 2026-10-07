@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="OsmAnd" xmlns="http://www.topografix.com/GPX/1/1">
+  <!-- No <type>, no power: ~70 m every 10 s (25 km/h). -->
+  <trk>
+    <trkseg>
+      <trkpt lat="-33.90000" lon="151.180"><time>2026-09-27T20:00:00Z</time></trkpt>
+      <trkpt lat="-33.89937" lon="151.180"><time>2026-09-27T20:00:10Z</time></trkpt>
+      <trkpt lat="-33.89874" lon="151.180"><time>2026-09-27T20:00:20Z</time></trkpt>
+      <trkpt lat="-33.89811" lon="151.180"><time>2026-09-27T20:00:30Z</time></trkpt>
+      <trkpt lat="-33.89748" lon="151.180"><time>2026-09-27T20:00:40Z</time></trkpt>
+      <trkpt lat="-33.89685" lon="151.180"><time>2026-09-27T20:00:50Z</time></trkpt>
+      <trkpt lat="-33.89622" lon="151.180"><time>2026-09-27T20:01:00Z</time></trkpt>
+      <trkpt lat="-33.89559" lon="151.180"><time>2026-09-27T20:01:10Z</time></trkpt>
+      <trkpt lat="-33.89496" lon="151.180"><time>2026-09-27T20:01:20Z</time></trkpt>
+      <trkpt lat="-33.89433" lon="151.180"><time>2026-09-27T20:01:30Z</time></trkpt>
+    </trkseg>
+  </trk>
+</gpx>

@@ -1,15 +1,22 @@
 import tzLookup from 'tz-lookup';
+import { typeFromLabel, type ActivityType, type TypeSource } from './activityType';
 import { haversineM, type LonLat } from './geo';
 import { parseGpx, type TrackPoint } from './gpx';
 import {
+  CYCLING_SPEED_KMH,
   ELEVATION_HYSTERESIS_M,
   MIN_COVERAGE,
   MOVING_SPEED_KMH,
   MOVING_WINDOW_S,
   SPIKE_LIMIT_KMH,
+  UNCERTAIN_SPEED_KMH,
 } from './settings';
 
 export interface ActivitySummary {
+  activityType: ActivityType;
+  typeSource: TypeSource;
+  /** The type was guessed from an average speed in the band where runs and rides overlap. */
+  typeUncertain: boolean;
   /** Accepted track points in file order, for drawing. */
   route: LonLat[];
   distanceM: number;
@@ -109,10 +116,11 @@ function elevationGain(elevations: number[]): number {
   return climbing ? gain + high - low : gain;
 }
 
-/** The analysis seam: GPX text in, activity summary out. Pure; runs in the worker and in tests. */
-export function analyseActivity(gpxText: string): ActivitySummary {
-  const { segments, typeLabel, creator, hasPower } = parseGpx(gpxText);
-  const accepted = segments.map((seg) => seg.filter((_, i) => !isSpike(seg, i, SPIKE_LIMIT_KMH.running)));
+type Metrics = Omit<ActivitySummary, 'activityType' | 'typeSource' | 'typeUncertain' | 'source'>;
+
+/** Everything except the type, for one spike limit (which depends on the type). */
+function measure(segments: TrackPoint[][], spikeLimitKmh: number): Metrics {
+  const accepted = segments.map((seg) => seg.filter((_, i) => !isSpike(seg, i, spikeLimitKmh)));
   const points = accepted.flat();
   if (points.length === 0) throw new Error('No track points found');
 
@@ -143,6 +151,44 @@ export function analyseActivity(gpxText: string): ActivitySummary {
     elapsedS,
     movingS,
     elevationGainM,
-    source: { typeLabel, creator, hasPower },
   };
+}
+
+const averageKmh = (m: Metrics) => (m.movingS ? kmh(m.distanceM, m.movingS * 1000) : null);
+
+/**
+ * The analysis seam: GPX text in, activity summary out. Pure; runs in the worker and in tests.
+ * `activityType` overrides detection (the user's Run/Ride toggle).
+ */
+export function analyseActivity(
+  gpxText: string,
+  options: { activityType?: ActivityType } = {},
+): ActivitySummary {
+  const { segments, typeLabel, creator, hasPower } = parseGpx(gpxText);
+  const source = { typeLabel, creator, hasPower };
+
+  // Known type: from the user, the file's <type>, or power data (only bikes record power).
+  const fromFile = typeFromLabel(typeLabel);
+  const known: [ActivityType, TypeSource] | null = options.activityType
+    ? [options.activityType, 'user']
+    : fromFile
+      ? [fromFile, 'file']
+      : hasPower
+        ? ['cycling', 'power']
+        : null;
+  if (known) {
+    const [activityType, typeSource] = known;
+    const metrics = measure(segments, SPIKE_LIMIT_KMH[activityType]);
+    return { activityType, typeSource, typeUncertain: false, ...metrics, source };
+  }
+
+  // Unknown type: measure with the stricter running spike limit, then guess from average moving speed.
+  const asRun = measure(segments, SPIKE_LIMIT_KMH.running);
+  const speed = averageKmh(asRun);
+  if (speed === null)
+    return { activityType: 'running', typeSource: 'default', typeUncertain: false, ...asRun, source };
+  const activityType: ActivityType = speed >= CYCLING_SPEED_KMH ? 'cycling' : 'running';
+  const typeUncertain = speed >= UNCERTAIN_SPEED_KMH.min && speed <= UNCERTAIN_SPEED_KMH.max;
+  const metrics = activityType === 'cycling' ? measure(segments, SPIKE_LIMIT_KMH.cycling) : asRun;
+  return { activityType, typeSource: 'speed', typeUncertain, ...metrics, source };
 }

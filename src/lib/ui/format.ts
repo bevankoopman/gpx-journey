@@ -18,6 +18,12 @@ export function pace(distanceM: number, movingS: number): string {
   return `${Math.floor(perKm / 60)}:${String(perKm % 60).padStart(2, '0')}`;
 }
 
+/** km/h to 1 dp. */
+export function speed(distanceM: number, movingS: number): string {
+  if (movingS <= 0) return '–';
+  return (distanceM / 1000 / (movingS / 3600)).toFixed(1);
+}
+
 /** Start date and time in the activity's own timezone, e.g. "Mon, 28 Sept 2026, 6:42 am AEST". */
 export function startTime(epochMs: number, timeZone: string): string {
   return new Intl.DateTimeFormat('en-AU', {

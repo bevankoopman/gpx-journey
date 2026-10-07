@@ -1,3 +1,4 @@
+import type { ActivityType } from './activityType';
 import type { ActivitySummary } from './analyseActivity';
 import type { WorkerRequest, WorkerResponse } from './messages';
 
@@ -26,11 +27,11 @@ function getWorker(): Worker {
   return worker;
 }
 
-/** Analyse GPX text off the main thread. */
-export function analyseInWorker(gpxText: string): Promise<ActivitySummary> {
+/** Analyse GPX text off the main thread; `activityType` overrides detection (the Run/Ride toggle). */
+export function analyseInWorker(gpxText: string, activityType?: ActivityType): Promise<ActivitySummary> {
   const id = nextId++;
   return new Promise((resolve, reject) => {
     pending.set(id, { resolve, reject });
-    getWorker().postMessage({ type: 'analyse', id, gpxText } satisfies WorkerRequest);
+    getWorker().postMessage({ type: 'analyse', id, gpxText, activityType } satisfies WorkerRequest);
   });
 }

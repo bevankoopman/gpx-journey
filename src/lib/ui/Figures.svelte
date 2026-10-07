@@ -1,8 +1,11 @@
 <script lang="ts">
+  import type { ActivityType } from '../analysis/activityType';
   import type { ActivitySummary } from '../analysis/analyseActivity';
-  import { duration, km, pace, startTime } from './format';
+  import { duration, km, pace, speed, startTime } from './format';
+  import TypeToggle from './TypeToggle.svelte';
 
-  let { summary }: { summary: ActivitySummary } = $props();
+  let { summary, onchoosetype }: { summary: ActivitySummary; onchoosetype: (type: ActivityType) => void } =
+    $props();
 
   const title = $derived(
     summary.startTime !== null && summary.timeZone !== null
@@ -11,7 +14,10 @@
   );
 </script>
 
-<h2 class="title">{title}</h2>
+<div class="head">
+  <h2 class="title">{title}</h2>
+  <TypeToggle {summary} onchoose={onchoosetype} />
+</div>
 
 <div class="figs">
   <div class="fig hero">
@@ -19,10 +25,14 @@
     <div class="k">Distance</div>
   </div>
   {#if summary.timed && summary.movingS !== null && summary.elapsedS !== null}
-    <!-- Running is assumed until the activity type and Run/Ride toggle arrive. -->
     <div class="fig">
-      <div class="v">{pace(summary.distanceM, summary.movingS)}<span class="unit">&nbsp;/km</span></div>
-      <div class="k">Avg pace</div>
+      {#if summary.activityType === 'running'}
+        <div class="v">{pace(summary.distanceM, summary.movingS)}<span class="unit">&nbsp;/km</span></div>
+        <div class="k">Avg pace</div>
+      {:else}
+        <div class="v">{speed(summary.distanceM, summary.movingS)}<span class="unit">&nbsp;km/h</span></div>
+        <div class="k">Avg speed</div>
+      {/if}
     </div>
     <div class="fig">
       <div class="v">{duration(summary.movingS)}</div>
@@ -46,6 +56,11 @@
 {/if}
 
 <style>
+  .head {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
   .title {
     font-size: 20px;
     font-weight: 650;

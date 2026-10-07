@@ -6,7 +6,11 @@ const post = (message: WorkerResponse) => self.postMessage(message);
 
 self.onmessage = ({ data }: MessageEvent<WorkerRequest>) => {
   try {
-    post({ type: 'result', id: data.id, summary: analyseActivity(data.gpxText) });
+    post({
+      type: 'result',
+      id: data.id,
+      summary: analyseActivity(data.gpxText, { activityType: data.activityType }),
+    });
   } catch (err) {
     post({ type: 'error', id: data.id, message: err instanceof Error ? err.message : String(err) });
   }

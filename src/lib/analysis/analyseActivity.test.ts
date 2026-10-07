@@ -141,4 +141,84 @@ describe('analyseActivity', () => {
   it('counts movement straight after a pause inside a segment', () => {
     expect(analyseActivity(fixture('auto-pause.gpx')).movingS).toBe(120);
   });
+
+  describe('activity type', () => {
+    it.each([
+      ['strava-numeric-run.gpx', 'running', '9'],
+      ['strava-numeric-ride.gpx', 'cycling', '1'],
+      ['single-segment.gpx', 'running', 'running'],
+      ['strava-route-ride.gpx', 'cycling', 'Ride'],
+      ['garmin-trail-run.gpx', 'running', 'trail_running'],
+      ['garmin-power.gpx', 'cycling', 'cycling'],
+    ])('reads %s as %s from its <type> "%s"', (file, activityType, label) => {
+      expect(analyseActivity(fixture(file))).toMatchObject({
+        activityType,
+        typeSource: 'file',
+        source: { typeLabel: label },
+      });
+    });
+
+    it('falls back to cycling when the file has power data but no <type>', () => {
+      expect(analyseActivity(fixture('power-ride.gpx'))).toMatchObject({
+        activityType: 'cycling',
+        typeSource: 'power',
+      });
+    });
+
+    it('guesses from average moving speed when there is no <type> or power data', () => {
+      // 25 km/h: clearly a ride.
+      expect(analyseActivity(fixture('fast-no-type.gpx'))).toMatchObject({
+        activityType: 'cycling',
+        typeSource: 'speed',
+        typeUncertain: false,
+      });
+      // 13.3 km/h: a run, but inside the 12–18 km/h band where runs and rides overlap.
+      expect(analyseActivity(fixture('overlap-speed-no-type.gpx'))).toMatchObject({
+        activityType: 'running',
+        typeSource: 'speed',
+        typeUncertain: true,
+      });
+      // 10.8 km/h: clearly a run.
+      expect(analyseActivity(fixture('one-untimed.gpx'))).toMatchObject({
+        activityType: 'running',
+        typeSource: 'speed',
+        typeUncertain: false,
+      });
+    });
+
+    it('defaults to running when there is no <type> and no timestamps to judge speed', () => {
+      expect(analyseActivity(fixture('mostly-untimed.gpx'))).toMatchObject({
+        activityType: 'running',
+        typeSource: 'default',
+      });
+    });
+
+    it("uses the user's choice, including that type's spike limit", () => {
+      const asRide = analyseActivity(fixture('gps-spike.gpx'), { activityType: 'cycling' });
+      expect(asRide).toMatchObject({ activityType: 'cycling', typeSource: 'user' });
+      // The 111 km/h jump is a spike for a run (60 km/h limit) but plausible for a ride (120 km/h).
+      expect(asRide.route).toHaveLength(4);
+      expect(analyseActivity(fixture('gps-spike.gpx'), { activityType: 'running' }).route).toHaveLength(3);
+    });
+
+    // The full agreed mapping, case-insensitive.
+    const withType = (type: string) =>
+      fixture('strava-numeric-run.gpx').replace('<type>9</type>', `<type>${type}</type>`);
+    it.each(['9', 'running', 'TRAIL_RUNNING', 'treadmill_running', 'Run', '10', '4', 'walking', 'Hiking'])(
+      'maps <type>%s</type> to running',
+      (type) => expect(analyseActivity(withType(type)).activityType).toBe('running'),
+    );
+    it.each([
+      '1',
+      'Cycling',
+      'Ride',
+      'ebikeride',
+      'touring_bicycle',
+      'road_biking',
+      'mountain_biking',
+      'gravel_cycling',
+    ])('maps <type>%s</type> to cycling', (type) =>
+      expect(analyseActivity(withType(type)).activityType).toBe('cycling'),
+    );
+  });
 });

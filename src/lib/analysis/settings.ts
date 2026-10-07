@@ -12,3 +12,8 @@ export const MIN_COVERAGE = 0.9;
 
 /** Dead band for elevation gain: rises and dips smaller than this are treated as GPS/barometer noise. */
 export const ELEVATION_HYSTERESIS_M = 5;
+
+/** With no usable `<type>` or power data: average moving speed at or above this means cycling. */
+export const CYCLING_SPEED_KMH = 15;
+/** A speed-based guess inside this band (km/h) is flagged as uncertain. */
+export const UNCERTAIN_SPEED_KMH = { min: 12, max: 18 } as const;
