@@ -9,6 +9,7 @@
   import Figures from './lib/ui/Figures.svelte';
   import MapView from './lib/ui/MapView.svelte';
   import PostcodeList from './lib/ui/PostcodeList.svelte';
+  import { errorMessage } from './lib/ui/errorMessage';
 
   type View =
     | { kind: 'upload'; error?: string }
@@ -38,8 +39,7 @@
       const summary = await analyseInWorker(gpxText);
       if (request === latest) view = { kind: 'result', summary, gpxText };
     } catch (err) {
-      if (request === latest)
-        view = { kind: 'upload', error: err instanceof Error ? err.message : String(err) };
+      if (request === latest) view = { kind: 'upload', error: errorMessage(err) };
     }
   }
 
@@ -89,7 +89,7 @@
       {#if view.kind === 'result'}<button type="button" onclick={newFile}>New file</button>{/if}
     </header>
     {#if view.kind === 'upload'}
-      {#if view.error}<p class="error" role="alert">Couldn't read that file: {view.error}</p>{/if}
+      {#if view.error}<p class="error" role="alert">{view.error}</p>{/if}
       <DropZone onfile={handleFile} {dragging} />
       <p class="muted small">
         Shows the route, distance, time, pace or speed, elevation gain and the Australian postcodes you passed

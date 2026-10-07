@@ -1,6 +1,7 @@
 import tzLookup from 'tz-lookup';
 import { typeFromLabel, type ActivityType, type TypeSource } from './activityType';
 import { haversineM, type LonLat } from './geo';
+import { AnalysisError } from './errors';
 import { parseGpx, type TrackPoint } from './gpx';
 import { matchPostcodes, type PostcodeIndex, type PostcodeResult } from './postcodes';
 import {
@@ -131,7 +132,7 @@ type Measured = Metrics & { segments: LonLat[][] };
 function measure(segments: TrackPoint[][], spikeLimitKmh: number): Measured {
   const accepted = segments.map((seg) => seg.filter((_, i) => !isSpike(seg, i, spikeLimitKmh)));
   const points = accepted.flat();
-  if (points.length === 0) throw new Error('No track points found');
+  if (points.length === 0) throw new AnalysisError('no-points', 'No track points found');
 
   // Consecutive accepted points, including across a segment gap, add their straight-line distance.
   const route = points.map(lonLat);

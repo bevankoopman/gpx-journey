@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { analyseActivity } from './analyseActivity';
+import { AnalysisError } from './errors';
 
-const fixtures = import.meta.glob<string>('./fixtures/*.gpx', {
+const fixtures = import.meta.glob<string>(['./fixtures/*.gpx', './fixtures/*.tcx', './fixtures/*.html'], {
   query: '?raw',
   import: 'default',
   eager: true,
@@ -220,5 +221,37 @@ describe('analyseActivity', () => {
     ])('maps <type>%s</type> to cycling', (type) =>
       expect(analyseActivity(withType(type)).activityType).toBe('cycling'),
     );
+  });
+
+  describe('files that cannot be analysed', () => {
+    const kindOf = (text: string) => {
+      try {
+        analyseActivity(text);
+      } catch (err) {
+        return err instanceof AnalysisError ? err.kind : `unexpected: ${String(err)}`;
+      }
+      return 'no error';
+    };
+
+    it.each([
+      ['a TCX export', fixture('activity.tcx')],
+      ['a web page', fixture('web-page.html')],
+      ['JSON', '{"type":"FeatureCollection","features":[]}'],
+      ['plain text', 'hello'],
+      ['an empty file', ''],
+    ])('rejects %s as not a GPX file', (_, text) => {
+      expect(kindOf(text)).toBe('not-gpx');
+    });
+
+    it.each([
+      ['a GPX file cut off part-way', fixture('truncated.gpx')],
+      ['a GPX file with mismatched tags', fixture('mismatched-tags.gpx')],
+    ])('rejects %s as damaged', (_, text) => {
+      expect(kindOf(text)).toBe('malformed');
+    });
+
+    it('rejects a GPX file without track points', () => {
+      expect(kindOf(fixture('no-track-points.gpx'))).toBe('no-points');
+    });
   });
 });

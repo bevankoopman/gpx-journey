@@ -3,10 +3,12 @@ import type { FeatureCollection, MultiPolygon, Polygon } from 'geojson';
 import { feature } from 'topojson-client';
 import type { Topology } from 'topojson-specification';
 import { analyseActivity } from './analyseActivity';
+import { AnalysisError } from './errors';
 import type { WorkerRequest, WorkerResponse } from './messages';
 import { buildPostcodeIndex, type PostcodeIndex } from './postcodes';
 
 const post = (message: WorkerResponse) => self.postMessage(message);
+const POSTCODE_WAIT_MS = 45_000;
 
 /** Resolves to null if the postcode data can't be loaded: activities still analyse, without postcodes. */
 let postcodeIndex: Promise<PostcodeIndex | null> = Promise.resolve(null);
@@ -38,13 +40,21 @@ self.onmessage = async ({ data }: MessageEvent<WorkerRequest>) => {
     return;
   }
   try {
-    const postcodes = (await postcodeIndex) ?? undefined;
+    // A stalled download mustn't hold every analysis hostage: after a while, analyse without postcodes.
+    const timeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), POSTCODE_WAIT_MS));
+    const postcodes = (await Promise.race([postcodeIndex, timeout])) ?? undefined;
+    post({ type: 'started', id: data.id });
     post({
       type: 'result',
       id: data.id,
       summary: analyseActivity(data.gpxText, { activityType: data.activityType, postcodes }),
     });
   } catch (err) {
-    post({ type: 'error', id: data.id, message: err instanceof Error ? err.message : String(err) });
+    post({
+      type: 'error',
+      id: data.id,
+      message: err instanceof Error ? err.message : String(err),
+      kind: err instanceof AnalysisError ? err.kind : undefined,
+    });
   }
 };

@@ -1,4 +1,5 @@
 import { parse, type TNode } from 'txml/txml';
+import { AnalysisError } from './errors';
 
 export interface TrackPoint {
   lon: number;
@@ -44,10 +45,22 @@ function hasPowerReading(node: TNode): boolean {
 }
 
 export function parseGpx(text: string): ParsedGpx {
-  // GPX is XML, not HTML: txml's default void tags would swallow `<link>`'s children.
-  const nodes = parse(text, { selfClosingTags: [], decodeEntities: true });
+  // Anything that never opens a <gpx> element (TCX, FIT read as text, web pages, JSON) isn't GPX at all.
+  if (!/<gpx[\s>]/.test(text)) throw new AnalysisError('not-gpx', 'Not a GPX file');
+  // txml is lenient about a missing end, so check the file wasn't cut off (an interrupted download or export).
+  if (!/<\/gpx>\s*$/.test(text)) throw new AnalysisError('malformed', 'The GPX file is incomplete');
+  let nodes: (TNode | string)[];
+  try {
+    // GPX is XML, not HTML: txml's default void tags would swallow `<link>`'s children.
+    nodes = parse(text, { selfClosingTags: [], decodeEntities: true });
+  } catch (err) {
+    throw new AnalysisError(
+      'malformed',
+      `The GPX file is damaged (${err instanceof Error ? err.message : err})`,
+    );
+  }
   const gpx = nodes.filter(isElement).find((n) => n.tagName === 'gpx');
-  if (!gpx) throw new Error('Not a GPX file');
+  if (!gpx) throw new AnalysisError('malformed', 'No <gpx> root element');
   const tracks = children(gpx, 'trk');
   const typeLabel = tracks.map((trk) => textOf(children(trk, 'type')[0])).find((t) => t !== '') ?? null;
   let hasPower = false;

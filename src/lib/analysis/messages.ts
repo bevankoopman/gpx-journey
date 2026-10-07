@@ -1,5 +1,6 @@
 import type { ActivityType } from './activityType';
 import type { ActivitySummary } from './analyseActivity';
+import type { AnalysisErrorKind } from './errors';
 
 /** Main thread → analysis worker. */
 export type WorkerRequest =
@@ -8,4 +9,7 @@ export type WorkerRequest =
 
 /** Analysis worker → main thread. */
 export type WorkerResponse =
-  { type: 'result'; id: number; summary: ActivitySummary } | { type: 'error'; id: number; message: string };
+  /** Analysis has begun (the postcode data is ready); the client's time limit starts now. */
+  | { type: 'started'; id: number }
+  | { type: 'result'; id: number; summary: ActivitySummary }
+  | { type: 'error'; id: number; message: string; kind?: AnalysisErrorKind };

@@ -35,6 +35,10 @@ npm run data:postcodes -- poa-2026
 
 The script downloads about 110 MB from abs.gov.au into `.cache/abs/<dataset>/` (gitignored) and prints the postcode count and output sizes. Postal Areas approximate Australia Post postcodes: they are built from mesh blocks, leave out PO-box-only and other non-street postcodes, and are frozen at 2021.
 
+## Performance
+
+A 100,000-point GPX shows its results in about 1–1.5 s even with the CPU throttled 4×; analysis runs in a Web Worker so the page stays responsive. Method, numbers and caveats: `docs/performance.md`.
+
 ## Planning
 
 Decisions are recorded on the closed [wayfinder map](https://github.com/bevankoopman/gpx-journey/issues/1) and its sub-issues. Domain terms are in `GLOSSARY.md`.
