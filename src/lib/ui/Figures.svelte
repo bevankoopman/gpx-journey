@@ -1,7 +1,17 @@
 <script lang="ts">
   import type { ActivityType } from '../analysis/activityType';
   import type { ActivitySummary } from '../analysis/analyseActivity';
-  import { duration, km, pace, speed, startTime } from './format';
+  import {
+    duration,
+    km,
+    pace,
+    speed,
+    spokenDuration,
+    spokenKm,
+    spokenPace,
+    spokenSpeed,
+    startTime,
+  } from './format';
   import TypeToggle from './TypeToggle.svelte';
 
   let { summary, onchoosetype }: { summary: ActivitySummary; onchoosetype: (type: ActivityType) => void } =
@@ -19,37 +29,64 @@
   <TypeToggle {summary} onchoose={onchoosetype} />
 </div>
 
-<div class="figs">
+<!-- A description list: each figure's label is announced with its value, in words. Shown value-first. -->
+<dl class="figs">
   <div class="fig hero">
-    <div class="v">{km(summary.distanceM)} km</div>
-    <div class="k">Distance</div>
+    <dt class="k">Distance</dt>
+    <dd class="v">
+      <span aria-hidden="true">{km(summary.distanceM)} km</span><span class="sr-only"
+        >{spokenKm(summary.distanceM)}</span
+      >
+    </dd>
   </div>
   {#if summary.timed && summary.movingS !== null && summary.elapsedS !== null}
     <div class="fig">
       {#if summary.activityType === 'running'}
-        <div class="v">{pace(summary.distanceM, summary.movingS)}<span class="unit">&nbsp;/km</span></div>
-        <div class="k">Avg pace</div>
+        <dt class="k">Avg pace</dt>
+        <dd class="v">
+          <span aria-hidden="true"
+            >{pace(summary.distanceM, summary.movingS)}<span class="unit">&nbsp;/km</span></span
+          >
+          <span class="sr-only">{spokenPace(summary.distanceM, summary.movingS)}</span>
+        </dd>
       {:else}
-        <div class="v">{speed(summary.distanceM, summary.movingS)}<span class="unit">&nbsp;km/h</span></div>
-        <div class="k">Avg speed</div>
+        <dt class="k">Avg speed</dt>
+        <dd class="v">
+          <span aria-hidden="true"
+            >{speed(summary.distanceM, summary.movingS)}<span class="unit">&nbsp;km/h</span></span
+          >
+          <span class="sr-only">{spokenSpeed(summary.distanceM, summary.movingS)}</span>
+        </dd>
       {/if}
     </div>
     <div class="fig">
-      <div class="v">{duration(summary.movingS)}</div>
-      <div class="k">Moving time</div>
+      <dt class="k">Moving time</dt>
+      <dd class="v">
+        <span aria-hidden="true">{duration(summary.movingS)}</span><span class="sr-only"
+          >{spokenDuration(summary.movingS)}</span
+        >
+      </dd>
     </div>
     <div class="fig">
-      <div class="v">{duration(summary.elapsedS)}</div>
-      <div class="k">Elapsed time</div>
+      <dt class="k">Elapsed time</dt>
+      <dd class="v">
+        <span aria-hidden="true">{duration(summary.elapsedS)}</span><span class="sr-only"
+          >{spokenDuration(summary.elapsedS)}</span
+        >
+      </dd>
     </div>
   {/if}
   {#if summary.elevationGainM !== null}
     <div class="fig">
-      <div class="v">{summary.elevationGainM} m</div>
-      <div class="k">Elevation gain</div>
+      <dt class="k">Elevation gain</dt>
+      <dd class="v">
+        <span aria-hidden="true">{summary.elevationGainM} m</span><span class="sr-only"
+          >{summary.elevationGainM} metres</span
+        >
+      </dd>
     </div>
   {/if}
-</div>
+</dl>
 
 {#if !summary.timed}
   <p class="note">This file has no timestamps, so time and pace aren’t available.</p>
@@ -67,11 +104,16 @@
     margin: 0;
   }
   .figs {
+    margin: 0;
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 10px;
   }
   .fig {
+    /* Label first in the markup (for screen readers), value first on screen. */
+    display: flex;
+    flex-direction: column-reverse;
+    justify-content: flex-end;
     background: var(--bg);
     border-radius: 10px;
     padding: 10px 12px;
@@ -80,6 +122,7 @@
     grid-column: span 2;
   }
   .v {
+    margin: 0;
     font-size: 22px;
     font-weight: 650;
     font-variant-numeric: tabular-nums;

@@ -10,6 +10,7 @@
   import MapView from './lib/ui/MapView.svelte';
   import PostcodeList from './lib/ui/PostcodeList.svelte';
   import { errorMessage } from './lib/ui/errorMessage';
+  import { spokenKm } from './lib/ui/format';
 
   type View =
     | { kind: 'upload'; error?: string }
@@ -22,6 +23,23 @@
   let dragging = $state(false);
   // The postcode highlighted in both the list and the map (hover/focus), and the components that act on picks.
   let highlighted = $state<string | null>(null);
+  // Screen-reader announcements: progress and results politely, errors assertively. The regions are always in
+  // the page (live regions inserted along with their text are announced unreliably).
+  let status = $state('');
+  let alertText = $state('');
+  let alertTimer: ReturnType<typeof setTimeout> | undefined;
+  function setAlert(message: string) {
+    clearTimeout(alertTimer); // a pending, now stale, error must not land after the region is reset
+    alertText = '';
+    // Set after a beat, so the same message twice is announced twice.
+    if (message) alertTimer = setTimeout(() => (alertText = message), 50);
+  }
+  function describe(summary: ActivitySummary): string {
+    const pc = summary.postcodes;
+    const postcodes =
+      pc && pc.overlapsAustralia ? `, ${pc.passed.length} postcode${pc.passed.length === 1 ? '' : 's'}` : '';
+    return `Analysis complete: ${spokenKm(summary.distanceM)}${postcodes}.`;
+  }
   let mapView: MapView | undefined = $state();
   let postcodeList: PostcodeList | undefined = $state();
 
@@ -34,12 +52,22 @@
     const request = ++latest;
     view = { kind: 'analysing' };
     highlighted = null;
+    status = 'Analysing file…';
+    setAlert('');
     try {
       const gpxText = await file.text();
       const summary = await analyseInWorker(gpxText);
-      if (request === latest) view = { kind: 'result', summary, gpxText };
+      if (request === latest) {
+        view = { kind: 'result', summary, gpxText };
+        status = describe(summary);
+      }
     } catch (err) {
-      if (request === latest) view = { kind: 'upload', error: errorMessage(err) };
+      if (request === latest) {
+        const message = errorMessage(err);
+        view = { kind: 'upload', error: message };
+        status = '';
+        setAlert(message);
+      }
     }
   }
 
@@ -52,7 +80,10 @@
     const { gpxText } = view;
     try {
       const summary = await analyseInWorker(gpxText, activityType);
-      if (request === latest) view = { kind: 'result', summary, gpxText };
+      if (request === latest) {
+        view = { kind: 'result', summary, gpxText };
+        status = `Showing as a ${activityType === 'running' ? 'run' : 'ride'}.`;
+      }
     } catch {
       // Same text that already analysed; leave the current result in place.
     }
@@ -60,6 +91,8 @@
 
   function newFile() {
     highlighted = null;
+    status = 'Ready for a new file.';
+    setAlert('');
     latest++;
     view = { kind: 'upload' };
   }
@@ -82,6 +115,9 @@
 
 <svelte:window {ondragover} {ondragleave} {ondrop} />
 
+<div class="sr-only" aria-live="polite">{status}</div>
+<div class="sr-only" role="alert">{alertText}</div>
+
 <div class="layout">
   <aside>
     <header>
@@ -89,7 +125,7 @@
       {#if view.kind === 'result'}<button type="button" onclick={newFile}>New file</button>{/if}
     </header>
     {#if view.kind === 'upload'}
-      {#if view.error}<p class="error" role="alert">{view.error}</p>{/if}
+      {#if view.error}<p class="error">{view.error}</p>{/if}
       <DropZone onfile={handleFile} {dragging} />
       <p class="muted small">
         Shows the route, distance, time, pace or speed, elevation gain and the Australian postcodes you passed

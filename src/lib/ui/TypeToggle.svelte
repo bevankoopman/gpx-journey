@@ -21,12 +21,12 @@
 </script>
 
 <div class="row">
-  <div class="seg" role="radiogroup" aria-label="Activity type">
+  <!-- Two toggle buttons (aria-pressed): reachable with Tab, activated with Enter or Space. -->
+  <div class="seg" role="group" aria-label="Activity type">
     {#each OPTIONS as [type, label] (type)}
       <button
         type="button"
-        role="radio"
-        aria-checked={summary.activityType === type}
+        aria-pressed={summary.activityType === type}
         class:on={summary.activityType === type}
         onclick={() => onchoose(type)}>{label}</button
       >
@@ -65,6 +65,6 @@
     color: var(--muted);
   }
   .note.hint {
-    color: var(--accent);
+    color: var(--accent-text);
   }
 </style>

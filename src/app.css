@@ -4,9 +4,13 @@
   --ink: #1d1d1f;
   --muted: #6b6b70;
   --line: #e4e4e0;
-  --route: #e8590c;
+  /* Darker than the accent so the route keeps 3:1 against Positron land and water (with a white casing). */
+  --route: #c2410c;
   --postcode: #1971c2;
   --accent: #e8590c;
+  /* Accent for small text: #e8590c is only 3.6:1 on white. */
+  --accent-text: #c2410c;
+  --focus: #1971c2;
   font-family:
     system-ui,
     -apple-system,
@@ -36,4 +40,23 @@ button {
 
 .small {
   font-size: 12px;
+}
+
+/* A visible keyboard focus ring on everything (borderless buttons included). */
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* Text for screen readers only. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }

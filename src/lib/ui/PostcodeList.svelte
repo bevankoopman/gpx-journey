@@ -2,7 +2,7 @@
   import type { PostcodeResult } from '../analysis/postcodes';
   import { POSTCODE_MIN_M } from '../analysis/settings';
   import { POSTCODE_CAVEAT } from '../credits';
-  import { km } from './format';
+  import { km, spokenKm } from './format';
 
   let {
     result,
@@ -56,6 +56,7 @@
             <button
               type="button"
               data-code={p.code}
+              aria-label={`Postcode ${p.code}${p.localities.length ? `, ${p.localities.join(', ')}` : ''}, ${spokenKm(p.distanceM)}`}
               class:hl={highlighted === p.code}
               onmouseenter={() => onhover(p.code)}
               onmouseleave={() => onhover(null)}
@@ -67,7 +68,7 @@
               <span class="body">
                 <span class="code">{p.code}</span>
                 <span class="loc">{p.localities.join(', ')}</span>
-                <span class="bar" style:width="{(p.distanceM / longest) * 100}%"></span>
+                <span class="bar" aria-hidden="true" style:width="{(p.distanceM / longest) * 100}%"></span>
               </span>
               <span class="d">{km(p.distanceM)} km</span>
             </button>

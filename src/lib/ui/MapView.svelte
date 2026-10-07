@@ -36,7 +36,7 @@
     [112.9, -43.7],
     [153.7, -10.6],
   ];
-  const ROUTE_COLOUR = '#e8590c'; // --route in app.css
+  const ROUTE_COLOUR = '#c2410c'; // --route in app.css
   const POSTCODE_COLOUR = '#1971c2'; // --postcode in app.css
   const EMPTY: FeatureCollection = { type: 'FeatureCollection', features: [] };
 
@@ -96,7 +96,7 @@
         paint: {
           'line-color': POSTCODE_COLOUR,
           'line-width': ['case', ['boolean', ['feature-state', 'hl'], false], 2.5, 1],
-          'line-opacity': 0.7,
+          'line-opacity': 1,
         },
       });
       m.addLayer({
@@ -108,6 +108,14 @@
       });
       m.addSource('route', { type: 'geojson', data: EMPTY });
       m.addSource('start', { type: 'geojson', data: EMPTY });
+      // A white casing under the route keeps it visible (3:1) over water and pale land alike.
+      m.addLayer({
+        id: 'route-casing',
+        type: 'line',
+        source: 'route',
+        layout: { 'line-join': 'round', 'line-cap': 'round' },
+        paint: { 'line-color': '#ffffff', 'line-width': 7 },
+      });
       m.addLayer({
         id: 'route',
         type: 'line',
@@ -206,7 +214,7 @@
   });
 </script>
 
-<div class="map" bind:this={container}></div>
+<div class="map" bind:this={container} role="region" aria-label="Map of the route and postcodes"></div>
 
 <style>
   .map {

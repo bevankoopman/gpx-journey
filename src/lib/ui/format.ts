@@ -37,3 +37,28 @@ export function startTime(epochMs: number, timeZone: string): string {
     timeZoneName: 'short',
   }).format(epochMs);
 }
+
+// Spoken forms for screen readers ("4:40 /km" would be read as "4 colon 40 slash k m").
+const plural = (n: number, unit: string) => `${n} ${unit}${n === 1 ? '' : 's'}`;
+
+/** e.g. 4751 → "1 hour 19 minutes 11 seconds". */
+export function spokenDuration(seconds: number): string {
+  const s = Math.round(seconds);
+  const parts = [
+    [Math.floor(s / 3600), 'hour'],
+    [Math.floor(s / 60) % 60, 'minute'],
+    [s % 60, 'second'],
+  ] as const;
+  const said = parts.filter(([n]) => n > 0).map(([n, unit]) => plural(n, unit));
+  return said.length ? said.join(' ') : '0 seconds';
+}
+
+/** e.g. "4 minutes 40 seconds per kilometre". */
+export function spokenPace(distanceM: number, movingS: number): string {
+  if (distanceM <= 0 || movingS <= 0) return 'not available';
+  return `${spokenDuration(movingS / (distanceM / 1000))} per kilometre`;
+}
+
+export const spokenSpeed = (distanceM: number, movingS: number) =>
+  movingS <= 0 ? 'not available' : `${speed(distanceM, movingS)} kilometres per hour`;
+export const spokenKm = (metres: number) => `${km(metres)} kilometres`;

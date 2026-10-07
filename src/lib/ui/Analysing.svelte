@@ -1,4 +1,5 @@
-<div class="card" role="status">
+<!-- Announced through the app's live region, so no role here (it would be read twice). -->
+<div class="card">
   <div class="spinner" aria-hidden="true"></div>
   <b>Analysing…</b>
   <span class="muted">Reading track and matching postcodes</span>
