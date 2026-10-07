@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="Garmin Connect" xmlns="http://www.topografix.com/GPX/1/1">
+  <trk>
+    <name>Part one</name>
+    <trkseg>
+      <trkpt lat="-33.900" lon="151.180"><time>2026-09-27T20:00:00Z</time></trkpt>
+      <trkpt lat="-33.899" lon="151.180"><time>2026-09-27T20:00:30Z</time></trkpt>
+    </trkseg>
+    <trkseg>
+      <trkpt lat="-33.898" lon="151.180"><time>2026-09-27T20:05:00Z</time></trkpt>
+      <trkpt lat="-33.897" lon="151.180"><time>2026-09-27T20:05:30Z</time></trkpt>
+    </trkseg>
+  </trk>
+  <trk>
+    <name>Part two</name>
+    <trkseg>
+      <trkpt lat="-33.896" lon="151.180"><time>2026-09-27T20:10:00Z</time></trkpt>
+      <trkpt lat="-33.895" lon="151.180"><time>2026-09-27T20:10:30Z</time></trkpt>
+    </trkseg>
+  </trk>
+</gpx>

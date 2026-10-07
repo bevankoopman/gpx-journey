@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="https://www.komoot.de" xmlns="http://www.topografix.com/GPX/1/1">
+  <metadata>
+    <name>Sunday ride</name>
+    <link href="https://www.komoot.de"><text>komoot</text><type>text/html</type></link>
+  </metadata>
+  <trk>
+    <name>Sunday ride</name>
+    <link href="https://www.komoot.de/tour/1"><type>text/html</type></link>
+    <type>cycling</type>
+    <trkseg>
+      <trkpt lat="-27.470" lon="153.020"><time>2026-09-27T21:00:00Z</time></trkpt>
+      <trkpt lat="-27.469" lon="153.020"><time>2026-09-27T21:00:10Z</time></trkpt>
+    </trkseg>
+  </trk>
+</gpx>
