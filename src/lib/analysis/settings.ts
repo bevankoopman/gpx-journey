@@ -11,7 +11,8 @@ export const MOVING_WINDOW_S = 10;
 export const MIN_COVERAGE = 0.9;
 
 /** Dead band for elevation gain: rises and dips smaller than this are treated as GPS/barometer noise. */
-export const ELEVATION_HYSTERESIS_M = 5;
+// 4 m: closest to Strava on real Strava exports (see docs/calibration.md); was 5 m.
+export const ELEVATION_HYSTERESIS_M = 4;
 
 /** With no usable `<type>` or power data: average moving speed at or above this means cycling. */
 export const CYCLING_SPEED_KMH = 15;

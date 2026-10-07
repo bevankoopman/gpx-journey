@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gpx version="1.1" creator="Garmin Connect" xmlns="http://www.topografix.com/GPX/1/1">
-  <!-- Elevations 10,13,16,19,22,18,25 m. 5 m dead band: the climb from the low of 10 starts once 16 clears it, the 4 m dip to 18 stays inside the band, the climb ends at 25. Gain = 25 − 10 = 15 m. -->
+  <!-- Elevations 10,13,16,19,22,19,25 m. Dead band: the climb from the low of 10 starts once 16 clears it, the 3 m dip to 19 stays inside the band, the climb ends at 25. Gain = 25 − 10 = 15 m. -->
   <trk>
     <type>running</type>
     <trkseg>
@@ -9,7 +9,7 @@
       <trkpt lat="-33.89946" lon="151.180"><ele>16</ele><time>2026-09-27T20:00:20Z</time></trkpt>
       <trkpt lat="-33.89919" lon="151.180"><ele>19</ele><time>2026-09-27T20:00:30Z</time></trkpt>
       <trkpt lat="-33.89892" lon="151.180"><ele>22</ele><time>2026-09-27T20:00:40Z</time></trkpt>
-      <trkpt lat="-33.89865" lon="151.180"><ele>18</ele><time>2026-09-27T20:00:50Z</time></trkpt>
+      <trkpt lat="-33.89865" lon="151.180"><ele>19</ele><time>2026-09-27T20:00:50Z</time></trkpt>
       <trkpt lat="-33.89838" lon="151.180"><ele>25</ele><time>2026-09-27T20:00:60Z</time></trkpt>
     </trkseg>
   </trk>

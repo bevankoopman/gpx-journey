@@ -115,7 +115,7 @@ describe('analyseActivity', () => {
     expect(analyseActivity(fixture('untimed-spike.gpx')).timed).toBe(false);
   });
 
-  it('measures elevation gain with a 5 m dead band, ignoring smaller dips', () => {
+  it('measures elevation gain through the dead band, ignoring smaller dips', () => {
     expect(analyseActivity(fixture('hill-run.gpx')).elevationGainM).toBe(15);
   });
 

@@ -35,6 +35,16 @@ npm run data:postcodes -- poa-2026
 
 The script downloads about 110 MB from abs.gov.au into `.cache/abs/<dataset>/` (gitignored) and prints the postcode count and output sizes. Postal Areas approximate Australia Post postcodes: they are built from mesh blocks, leave out PO-box-only and other non-street postcodes, and are frozen at 2021.
 
+## Test fixtures from real activities
+
+`src/lib/analysis/fixtures/real/` holds real Strava exports used as regression tests. Anonymise any new real file before committing it (the repo is public):
+
+```sh
+npx tsx scripts/anonymise-gpx.ts ~/Downloads/activity.gpx src/lib/analysis/fixtures/real/<name>.gpx
+```
+
+It writes a fresh GPX keeping only positions, elevation, times, power and the activity type; shifts timestamps to 2026-01-01; and cuts out the start, the end and every stop (home, work) with ~800 m circles whose centres are randomly offset, so the places can't be recovered. Check the output before committing. Calibration of the analysis settings against Strava: `docs/calibration.md`.
+
 ## Performance
 
 A 100,000-point GPX shows its results in about 1–1.5 s even with the CPU throttled 4×; analysis runs in a Web Worker so the page stays responsive. Method, numbers and caveats: `docs/performance.md`.
