@@ -17,3 +17,9 @@ export const ELEVATION_HYSTERESIS_M = 5;
 export const CYCLING_SPEED_KMH = 15;
 /** A speed-based guess inside this band (km/h) is flagged as uncertain. */
 export const UNCERTAIN_SPEED_KMH = { min: 12, max: 18 } as const;
+
+/** A postcode counts as passed through only with at least this much route inside it (filters boundary-road wobble). */
+export const POSTCODE_MIN_M = 50;
+
+/** Steps longer than this are always checked for postcode boundaries, even if both ends share a postcode. */
+export const POSTCODE_SPARSE_STEP_M = 100;

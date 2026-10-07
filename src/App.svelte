@@ -1,12 +1,14 @@
 <script lang="ts">
   import type { ActivityType } from './lib/analysis/activityType';
   import type { ActivitySummary } from './lib/analysis/analyseActivity';
-  import { analyseInWorker } from './lib/analysis/client';
+  import { onMount } from 'svelte';
+  import { analyseInWorker, prefetchPostcodes } from './lib/analysis/client';
   import { CREDITS } from './lib/credits';
   import Analysing from './lib/ui/Analysing.svelte';
   import DropZone from './lib/ui/DropZone.svelte';
   import Figures from './lib/ui/Figures.svelte';
   import MapView from './lib/ui/MapView.svelte';
+  import PostcodeList from './lib/ui/PostcodeList.svelte';
 
   type View =
     | { kind: 'upload'; error?: string }
@@ -17,6 +19,9 @@
   // Raw: the summary is replaced wholesale, never mutated, and a long route must not become thousands of proxies.
   let view = $state.raw<View>({ kind: 'upload' });
   let dragging = $state(false);
+
+  // Fetch and index the postcode boundaries now, so they are usually ready by the time a file is chosen.
+  onMount(prefetchPostcodes);
   // Only the latest file's analysis may land; a slower earlier one is ignored.
   let latest = 0;
 
@@ -88,10 +93,16 @@
       <Analysing />
     {:else}
       <Figures summary={view.summary} onchoosetype={chooseType} />
+      <PostcodeList result={view.summary.postcodes} />
     {/if}
     <footer>{CREDITS}</footer>
   </aside>
-  <div class="mapwrap"><MapView route={view.kind === 'result' ? view.summary.route : null} /></div>
+  <div class="mapwrap">
+    <MapView
+      route={view.kind === 'result' ? view.summary.route : null}
+      postcodes={view.kind === 'result' ? (view.summary.postcodes?.shapes ?? null) : null}
+    />
+  </div>
 </div>
 
 <style>

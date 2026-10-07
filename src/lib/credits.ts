@@ -2,7 +2,8 @@
 
 /** Full credits shown at the foot of the sidebar. */
 export const CREDITS =
-  'Postcode boundaries: Postal Areas, ASGS Ed.3 (2021), © Commonwealth of Australia (ABS), CC BY 4.0, simplified. ' +
+  'Postcode boundaries and localities: Postal Areas and Suburbs and Localities, ASGS Ed.3 (2021), and Census 2021 ' +
+  'mesh block counts, © Commonwealth of Australia (ABS), CC BY 4.0; boundaries simplified. ' +
   'Map: OpenFreeMap © OpenMapTiles, data from OpenStreetMap contributors.';
 
 /** Added to the map's attribution control; the basemap style supplies the OpenFreeMap/OSM credit itself. */

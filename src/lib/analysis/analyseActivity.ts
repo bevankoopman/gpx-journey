@@ -2,6 +2,7 @@ import tzLookup from 'tz-lookup';
 import { typeFromLabel, type ActivityType, type TypeSource } from './activityType';
 import { haversineM, type LonLat } from './geo';
 import { parseGpx, type TrackPoint } from './gpx';
+import { matchPostcodes, type PostcodeIndex, type PostcodeResult } from './postcodes';
 import {
   CYCLING_SPEED_KMH,
   ELEVATION_HYSTERESIS_M,
@@ -30,6 +31,8 @@ export interface ActivitySummary {
   movingS: number | null;
   /** Null when under MIN_COVERAGE of points have elevation. */
   elevationGainM: number | null;
+  /** Postcodes along the route; null when no postcode index was supplied. */
+  postcodes: PostcodeResult | null;
   /** Facts from the file used later to decide the activity type. */
   source: { typeLabel: string | null; creator: string | null; hasPower: boolean };
 }
@@ -116,10 +119,16 @@ function elevationGain(elevations: number[]): number {
   return climbing ? gain + high - low : gain;
 }
 
-type Metrics = Omit<ActivitySummary, 'activityType' | 'typeSource' | 'typeUncertain' | 'source'>;
+type Metrics = Omit<
+  ActivitySummary,
+  'activityType' | 'typeSource' | 'typeUncertain' | 'source' | 'postcodes'
+>;
 
 /** Everything except the type, for one spike limit (which depends on the type). */
-function measure(segments: TrackPoint[][], spikeLimitKmh: number): Metrics {
+/** Metrics plus the accepted points per segment, which postcode matching needs (gaps are not travelled). */
+type Measured = Metrics & { segments: LonLat[][] };
+
+function measure(segments: TrackPoint[][], spikeLimitKmh: number): Measured {
   const accepted = segments.map((seg) => seg.filter((_, i) => !isSpike(seg, i, spikeLimitKmh)));
   const points = accepted.flat();
   if (points.length === 0) throw new Error('No track points found');
@@ -151,10 +160,11 @@ function measure(segments: TrackPoint[][], spikeLimitKmh: number): Metrics {
     elapsedS,
     movingS,
     elevationGainM,
+    segments: accepted.map((seg) => seg.map(lonLat)),
   };
 }
 
-const averageKmh = (m: Metrics) => (m.movingS ? kmh(m.distanceM, m.movingS * 1000) : null);
+const averageKmh = (m: Measured) => (m.movingS ? kmh(m.distanceM, m.movingS * 1000) : null);
 
 /**
  * The analysis seam: GPX text in, activity summary out. Pure; runs in the worker and in tests.
@@ -162,10 +172,14 @@ const averageKmh = (m: Metrics) => (m.movingS ? kmh(m.distanceM, m.movingS * 100
  */
 export function analyseActivity(
   gpxText: string,
-  options: { activityType?: ActivityType } = {},
+  options: { activityType?: ActivityType; postcodes?: PostcodeIndex } = {},
 ): ActivitySummary {
   const { segments, typeLabel, creator, hasPower } = parseGpx(gpxText);
   const source = { typeLabel, creator, hasPower };
+  const withPostcodes = ({ segments: accepted, ...m }: Measured) => ({
+    ...m,
+    postcodes: options.postcodes ? matchPostcodes(accepted, options.postcodes) : null,
+  });
 
   // Known type: from the user, the file's <type>, or power data (only bikes record power).
   const fromFile = typeFromLabel(typeLabel);
@@ -179,16 +193,22 @@ export function analyseActivity(
   if (known) {
     const [activityType, typeSource] = known;
     const metrics = measure(segments, SPIKE_LIMIT_KMH[activityType]);
-    return { activityType, typeSource, typeUncertain: false, ...metrics, source };
+    return { activityType, typeSource, typeUncertain: false, ...withPostcodes(metrics), source };
   }
 
   // Unknown type: measure with the stricter running spike limit, then guess from average moving speed.
   const asRun = measure(segments, SPIKE_LIMIT_KMH.running);
   const speed = averageKmh(asRun);
   if (speed === null)
-    return { activityType: 'running', typeSource: 'default', typeUncertain: false, ...asRun, source };
+    return {
+      activityType: 'running',
+      typeSource: 'default',
+      typeUncertain: false,
+      ...withPostcodes(asRun),
+      source,
+    };
   const activityType: ActivityType = speed >= CYCLING_SPEED_KMH ? 'cycling' : 'running';
   const typeUncertain = speed >= UNCERTAIN_SPEED_KMH.min && speed <= UNCERTAIN_SPEED_KMH.max;
   const metrics = activityType === 'cycling' ? measure(segments, SPIKE_LIMIT_KMH.cycling) : asRun;
-  return { activityType, typeSource: 'speed', typeUncertain, ...metrics, source };
+  return { activityType, typeSource: 'speed', typeUncertain, ...withPostcodes(metrics), source };
 }

@@ -1,8 +1,11 @@
+import boundariesUrl from '../../data/postcodes/poa-2021.topo.json?url';
+import localitiesUrl from '../../data/postcodes/poa-2021.localities.json?url';
 import type { ActivityType } from './activityType';
 import type { ActivitySummary } from './analyseActivity';
 import type { WorkerRequest, WorkerResponse } from './messages';
 
 let worker: Worker | undefined;
+let wantPostcodes = false;
 let nextId = 0;
 const pending = new Map<number, { resolve: (s: ActivitySummary) => void; reject: (e: Error) => void }>();
 
@@ -23,8 +26,21 @@ function getWorker(): Worker {
       worker?.terminate();
       worker = undefined;
     };
+    // A replacement worker (after a crash) needs the postcode data too.
+    if (wantPostcodes) loadPostcodesIn(worker);
   }
   return worker;
+}
+
+const loadPostcodesIn = (w: Worker) =>
+  w.postMessage({ type: 'loadPostcodes', boundariesUrl, localitiesUrl } satisfies WorkerRequest);
+
+/** Start downloading and indexing the postcode data in the worker, so it is usually ready before an upload. */
+export function prefetchPostcodes(): void {
+  if (wantPostcodes) return;
+  wantPostcodes = true;
+  if (worker) loadPostcodesIn(worker);
+  else getWorker();
 }
 
 /** Analyse GPX text off the main thread; `activityType` overrides detection (the Run/Ride toggle). */

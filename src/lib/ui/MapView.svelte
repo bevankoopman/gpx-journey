@@ -10,12 +10,19 @@
   import 'maplibre-gl/dist/maplibre-gl.css';
   import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url';
   import { onMount } from 'svelte';
-  import type { FeatureCollection } from 'geojson';
+  import type { FeatureCollection, MultiPolygon, Polygon } from 'geojson';
   import type { LonLat } from '../analysis/geo';
   import { MAP_ATTRIBUTION } from '../credits';
   import { PHONE_QUERY } from './layout';
 
-  let { route = null }: { route?: readonly LonLat[] | null } = $props();
+  let {
+    route = null,
+    postcodes = null,
+  }: {
+    route?: readonly LonLat[] | null;
+    /** Boundaries of the postcodes passed through, shaded under the route. */
+    postcodes?: FeatureCollection<Polygon | MultiPolygon, { code: string }> | null;
+  } = $props();
 
   const STYLE_URL = 'https://tiles.openfreemap.org/styles/positron';
   const AUSTRALIA: [[number, number], [number, number]] = [
@@ -23,6 +30,7 @@
     [153.7, -10.6],
   ];
   const ROUTE_COLOUR = '#e8590c'; // --route in app.css
+  const POSTCODE_COLOUR = '#1971c2'; // --postcode in app.css
   const EMPTY: FeatureCollection = { type: 'FeatureCollection', features: [] };
 
   // MapLibre looks for its worker beside its own module, which bundling moves; point it at Vite's copy.
@@ -64,6 +72,26 @@
 
     m.once('load', () => {
       fold();
+      m.addSource('postcodes', { type: 'geojson', data: EMPTY });
+      m.addLayer({
+        id: 'postcode-fill',
+        type: 'fill',
+        source: 'postcodes',
+        paint: { 'fill-color': POSTCODE_COLOUR, 'fill-opacity': 0.1 },
+      });
+      m.addLayer({
+        id: 'postcode-line',
+        type: 'line',
+        source: 'postcodes',
+        paint: { 'line-color': POSTCODE_COLOUR, 'line-width': 1, 'line-opacity': 0.7 },
+      });
+      m.addLayer({
+        id: 'postcode-label',
+        type: 'symbol',
+        source: 'postcodes',
+        layout: { 'text-field': ['get', 'code'], 'text-size': 12, 'text-font': ['Noto Sans Bold'] },
+        paint: { 'text-color': POSTCODE_COLOUR, 'text-halo-color': '#fff', 'text-halo-width': 1.5 },
+      });
       m.addSource('route', { type: 'geojson', data: EMPTY });
       m.addSource('start', { type: 'geojson', data: EMPTY });
       m.addLayer({
@@ -92,6 +120,12 @@
       m.remove();
       map = undefined;
     };
+  });
+
+  // Shade the postcodes passed through (independent of the route, so re-analysis doesn't refit the view).
+  $effect(() => {
+    if (!loaded || !map) return;
+    map.getSource<GeoJSONSource>('postcodes')?.setData(postcodes ?? EMPTY);
   });
 
   // Draw the route, or clear it and return to Australia, whenever it changes once the style is ready.
