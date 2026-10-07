@@ -89,4 +89,56 @@ describe('analyseActivity', () => {
   it('rejects a GPX file that has no track points', () => {
     expect(() => analyseActivity(fixture('no-track-points.gpx'))).toThrow('No track points found');
   });
+
+  it('counts moving time only while moving, excluding stops and gaps between segments', () => {
+    const summary = analyseActivity(fixture('paused-run.gpx'));
+    expect(summary.timed).toBe(true);
+    expect(summary.movingS).toBe(60);
+    expect(summary.elapsedS).toBe(480);
+  });
+
+  it('does not count GPS wobble while standing still as moving', () => {
+    const summary = analyseActivity(fixture('standing-wobble.gpx'));
+    expect(summary.elapsedS).toBe(30);
+    // Point-to-point speed would call all 30 s moving; at most the first step (no 10 s history yet) counts.
+    expect(summary.movingS).toBeLessThanOrEqual(1);
+  });
+
+  it('treats a file as untimed when under 90% of points have timestamps', () => {
+    expect(analyseActivity(fixture('mostly-untimed.gpx'))).toMatchObject({
+      timed: false,
+      movingS: null,
+      elapsedS: null,
+    });
+    expect(analyseActivity(fixture('one-untimed.gpx'))).toMatchObject({ timed: true, elapsedS: 90 });
+    expect(analyseActivity(fixture('untimed-spike.gpx')).timed).toBe(false);
+  });
+
+  it('measures elevation gain with a 5 m dead band, ignoring smaller dips', () => {
+    expect(analyseActivity(fixture('hill-run.gpx')).elevationGainM).toBe(15);
+  });
+
+  it('measures a climb from the true bottom of a gradual descent', () => {
+    expect(analyseActivity(fixture('valley.gpx')).elevationGainM).toBe(10);
+  });
+
+  it('gives no elevation gain when under 90% of points have elevation', () => {
+    expect(analyseActivity(fixture('multi-track.gpx')).elevationGainM).toBeNull();
+  });
+
+  it('reports the start time and the timezone where the activity started', () => {
+    expect(analyseActivity(fixture('single-segment.gpx'))).toMatchObject({
+      startTime: Date.parse('2026-09-27T20:42:10Z'),
+      timeZone: 'Australia/Sydney',
+    });
+    expect(analyseActivity(fixture('perth-ride.gpx'))).toMatchObject({
+      startTime: Date.parse('2026-09-27T23:15:00Z'),
+      timeZone: 'Australia/Perth',
+    });
+    expect(analyseActivity(fixture('mostly-untimed.gpx'))).toMatchObject({ startTime: null, timeZone: null });
+  });
+
+  it('counts movement straight after a pause inside a segment', () => {
+    expect(analyseActivity(fixture('auto-pause.gpx')).movingS).toBe(120);
+  });
 });

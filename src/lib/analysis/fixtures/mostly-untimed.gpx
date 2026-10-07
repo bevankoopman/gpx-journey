@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="Some planner" xmlns="http://www.topografix.com/GPX/1/1">
+  <!-- 10 points, 2 without <time>: 80% timed, below the 90% needed. -->
+  <trk>
+    <trkseg>
+      <trkpt lat="-33.90000" lon="151.180"><time>2026-09-27T20:00:00Z</time></trkpt>
+      <trkpt lat="-33.89973" lon="151.180"><time>2026-09-27T20:00:10Z</time></trkpt>
+      <trkpt lat="-33.89946" lon="151.180"><time>2026-09-27T20:00:20Z</time></trkpt>
+      <trkpt lat="-33.89919" lon="151.180"></trkpt>
+      <trkpt lat="-33.89892" lon="151.180"><time>2026-09-27T20:00:40Z</time></trkpt>
+      <trkpt lat="-33.89865" lon="151.180"><time>2026-09-27T20:00:50Z</time></trkpt>
+      <trkpt lat="-33.89838" lon="151.180"><time>2026-09-27T20:01:00Z</time></trkpt>
+      <trkpt lat="-33.89811" lon="151.180"></trkpt>
+      <trkpt lat="-33.89784" lon="151.180"><time>2026-09-27T20:01:20Z</time></trkpt>
+      <trkpt lat="-33.89757" lon="151.180"><time>2026-09-27T20:01:30Z</time></trkpt>
+    </trkseg>
+  </trk>
+</gpx>

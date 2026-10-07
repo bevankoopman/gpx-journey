@@ -1,17 +1,56 @@
 <script lang="ts">
   import type { ActivitySummary } from '../analysis/analyseActivity';
+  import { duration, km, pace, startTime } from './format';
 
   let { summary }: { summary: ActivitySummary } = $props();
+
+  const title = $derived(
+    summary.startTime !== null && summary.timeZone !== null
+      ? startTime(summary.startTime, summary.timeZone)
+      : 'Untimed route',
+  );
 </script>
+
+<h2 class="title">{title}</h2>
 
 <div class="figs">
   <div class="fig hero">
-    <div class="v">{(summary.distanceM / 1000).toFixed(2)} km</div>
+    <div class="v">{km(summary.distanceM)} km</div>
     <div class="k">Distance</div>
   </div>
+  {#if summary.timed && summary.movingS !== null && summary.elapsedS !== null}
+    <!-- Running is assumed until the activity type and Run/Ride toggle arrive. -->
+    <div class="fig">
+      <div class="v">{pace(summary.distanceM, summary.movingS)}<span class="unit">&nbsp;/km</span></div>
+      <div class="k">Avg pace</div>
+    </div>
+    <div class="fig">
+      <div class="v">{duration(summary.movingS)}</div>
+      <div class="k">Moving time</div>
+    </div>
+    <div class="fig">
+      <div class="v">{duration(summary.elapsedS)}</div>
+      <div class="k">Elapsed time</div>
+    </div>
+  {/if}
+  {#if summary.elevationGainM !== null}
+    <div class="fig">
+      <div class="v">{summary.elevationGainM} m</div>
+      <div class="k">Elevation gain</div>
+    </div>
+  {/if}
 </div>
 
+{#if !summary.timed}
+  <p class="note">This file has no timestamps, so time and pace aren’t available.</p>
+{/if}
+
 <style>
+  .title {
+    font-size: 20px;
+    font-weight: 650;
+    margin: 0;
+  }
   .figs {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -26,12 +65,26 @@
     grid-column: span 2;
   }
   .v {
-    font-size: 30px;
+    font-size: 22px;
     font-weight: 650;
     font-variant-numeric: tabular-nums;
+  }
+  .hero .v {
+    font-size: 30px;
+  }
+  .unit {
+    font-size: 12px;
   }
   .k {
     font-size: 12px;
     color: var(--muted);
+  }
+  .note {
+    margin: 0;
+    padding: 14px;
+    border-radius: 10px;
+    background: #f1f1ee;
+    color: var(--muted);
+    font-size: 14px;
   }
 </style>

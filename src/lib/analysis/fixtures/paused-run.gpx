@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="StravaGPX" xmlns="http://www.topografix.com/GPX/1/1">
+  <!-- ~30 m every 10 s (10.8 km/h). A 5 min stop with 3 m of drift inside segment 1,
+       then a 2 min recording gap before segment 2. Moving = 30 + 10 + 10 + 10 = 60 s; elapsed = 480 s. -->
+  <trk>
+    <type>running</type>
+    <trkseg>
+      <trkpt lat="-33.90000" lon="151.180"><time>2026-09-27T20:00:00Z</time></trkpt>
+      <trkpt lat="-33.89973" lon="151.180"><time>2026-09-27T20:00:10Z</time></trkpt>
+      <trkpt lat="-33.89946" lon="151.180"><time>2026-09-27T20:00:20Z</time></trkpt>
+      <trkpt lat="-33.89919" lon="151.180"><time>2026-09-27T20:00:30Z</time></trkpt>
+      <trkpt lat="-33.89916" lon="151.180"><time>2026-09-27T20:05:30Z</time></trkpt>
+      <trkpt lat="-33.89889" lon="151.180"><time>2026-09-27T20:05:40Z</time></trkpt>
+      <trkpt lat="-33.89862" lon="151.180"><time>2026-09-27T20:05:50Z</time></trkpt>
+    </trkseg>
+    <trkseg>
+      <trkpt lat="-33.89835" lon="151.180"><time>2026-09-27T20:07:50Z</time></trkpt>
+      <trkpt lat="-33.89808" lon="151.180"><time>2026-09-27T20:08:00Z</time></trkpt>
+    </trkseg>
+  </trk>
+</gpx>

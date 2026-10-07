@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="StravaGPX iPhone" xmlns="http://www.topografix.com/GPX/1/1">
+  <!-- 30 s standing still at 1 Hz with ~0.4 m of GPS wobble: 1.4 km/h point to point, ~0 net. -->
+  <trk>
+    <trkseg>
+      <trkpt lat="-33.9000000" lon="151.180"><time>2026-09-27T20:00:00Z</time></trkpt>
+      <trkpt lat="-33.9000036" lon="151.180"><time>2026-09-27T20:00:01Z</time></trkpt>
+      <trkpt lat="-33.9000000" lon="151.180"><time>2026-09-27T20:00:02Z</time></trkpt>
+      <trkpt lat="-33.9000036" lon="151.180"><time>2026-09-27T20:00:03Z</time></trkpt>
+      <trkpt lat="-33.9000000" lon="151.180"><time>2026-09-27T20:00:04Z</time></trkpt>
+      <trkpt lat="-33.9000036" lon="151.180"><time>2026-09-27T20:00:05Z</time></trkpt>
+      <trkpt lat="-33.9000000" lon="151.180"><time>2026-09-27T20:00:06Z</time></trkpt>
+      <trkpt lat="-33.9000036" lon="151.180"><time>2026-09-27T20:00:07Z</time></trkpt>
+      <trkpt lat="-33.9000000" lon="151.180"><time>2026-09-27T20:00:08Z</time></trkpt>
+      <trkpt lat="-33.9000036" lon="151.180"><time>2026-09-27T20:00:09Z</time></trkpt>
+      <trkpt lat="-33.9000000" lon="151.180"><time>2026-09-27T20:00:10Z</time></trkpt>
+      <trkpt lat="-33.9000036" lon="151.180"><time>2026-09-27T20:00:11Z</time></trkpt>
+      <trkpt lat="-33.9000000" lon="151.180"><time>2026-09-27T20:00:12Z</time></trkpt>
+      <trkpt lat="-33.9000036" lon="151.180"><time>2026-09-27T20:00:13Z</time></trkpt>
+      <trkpt lat="-33.9000000" lon="151.180"><time>2026-09-27T20:00:14Z</time></trkpt>
+      <trkpt lat="-33.9000036" lon="151.180"><time>2026-09-27T20:00:15Z</time></trkpt>
+      <trkpt lat="-33.9000000" lon="151.180"><time>2026-09-27T20:00:16Z</time></trkpt>
+      <trkpt lat="-33.9000036" lon="151.180"><time>2026-09-27T20:00:17Z</time></trkpt>
+      <trkpt lat="-33.9000000" lon="151.180"><time>2026-09-27T20:00:18Z</time></trkpt>
+      <trkpt lat="-33.9000036" lon="151.180"><time>2026-09-27T20:00:19Z</time></trkpt>
+      <trkpt lat="-33.9000000" lon="151.180"><time>2026-09-27T20:00:20Z</time></trkpt>
+      <trkpt lat="-33.9000036" lon="151.180"><time>2026-09-27T20:00:21Z</time></trkpt>
+      <trkpt lat="-33.9000000" lon="151.180"><time>2026-09-27T20:00:22Z</time></trkpt>
+      <trkpt lat="-33.9000036" lon="151.180"><time>2026-09-27T20:00:23Z</time></trkpt>
+      <trkpt lat="-33.9000000" lon="151.180"><time>2026-09-27T20:00:24Z</time></trkpt>
+      <trkpt lat="-33.9000036" lon="151.180"><time>2026-09-27T20:00:25Z</time></trkpt>
+      <trkpt lat="-33.9000000" lon="151.180"><time>2026-09-27T20:00:26Z</time></trkpt>
+      <trkpt lat="-33.9000036" lon="151.180"><time>2026-09-27T20:00:27Z</time></trkpt>
+      <trkpt lat="-33.9000000" lon="151.180"><time>2026-09-27T20:00:28Z</time></trkpt>
+      <trkpt lat="-33.9000036" lon="151.180"><time>2026-09-27T20:00:29Z</time></trkpt>
+      <trkpt lat="-33.9000000" lon="151.180"><time>2026-09-27T20:00:30Z</time></trkpt>
+    </trkseg>
+  </trk>
+</gpx>

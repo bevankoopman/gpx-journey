@@ -5,6 +5,8 @@ export interface TrackPoint {
   lat: number;
   /** Epoch milliseconds, or null when the point has no (valid) `<time>`. */
   time: number | null;
+  /** Metres from `<ele>`, or null when absent. */
+  ele: number | null;
 }
 
 export interface ParsedGpx {
@@ -31,7 +33,7 @@ const textOf = (node: TNode | undefined) =>
 /** Tag name without its namespace prefix, e.g. `gpxpx:PowerInWatts` → `PowerInWatts`. */
 const localName = (node: TNode) => node.tagName.slice(node.tagName.indexOf(':') + 1);
 
-/** Attribute → number; missing or blank is NaN (not 0, as `Number('')` would give). */
+/** Attribute or element text → number; missing or blank is NaN (not 0, as `Number('')` would give). */
 const coordinate = (value: string | null | undefined) => (value?.trim() ? Number(value) : NaN);
 
 const POWER_TAGS = new Set(['power', 'powerinwatts']);
@@ -56,10 +58,12 @@ export function parseGpx(text: string): ParsedGpx {
           const extensions = children(pt, 'extensions')[0];
           if (!hasPower && extensions && hasPowerReading(extensions)) hasPower = true;
           const time = Date.parse(textOf(children(pt, 'time')[0]));
+          const ele = coordinate(textOf(children(pt, 'ele')[0]));
           return {
             lon: coordinate(pt.attributes.lon),
             lat: coordinate(pt.attributes.lat),
             time: Number.isNaN(time) ? null : time,
+            ele: Number.isFinite(ele) ? ele : null,
           };
         })
         // A point without a usable position can't be drawn or measured; skip it.

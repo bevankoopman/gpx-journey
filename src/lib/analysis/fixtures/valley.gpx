@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="Garmin Connect" xmlns="http://www.topografix.com/GPX/1/1">
+  <!-- Elevation 100 → 90 → 100 m in 1 m steps: one 10 m climb out of the valley. -->
+  <trk>
+    <trkseg>
+      <trkpt lat="-33.90000" lon="151.180"><ele>100</ele><time>2026-09-27T20:00:00Z</time></trkpt>
+      <trkpt lat="-33.89973" lon="151.180"><ele>99</ele><time>2026-09-27T20:00:10Z</time></trkpt>
+      <trkpt lat="-33.89946" lon="151.180"><ele>98</ele><time>2026-09-27T20:00:20Z</time></trkpt>
+      <trkpt lat="-33.89919" lon="151.180"><ele>97</ele><time>2026-09-27T20:00:30Z</time></trkpt>
+      <trkpt lat="-33.89892" lon="151.180"><ele>96</ele><time>2026-09-27T20:00:40Z</time></trkpt>
+      <trkpt lat="-33.89865" lon="151.180"><ele>95</ele><time>2026-09-27T20:00:50Z</time></trkpt>
+      <trkpt lat="-33.89838" lon="151.180"><ele>94</ele><time>2026-09-27T20:01:00Z</time></trkpt>
+      <trkpt lat="-33.89811" lon="151.180"><ele>93</ele><time>2026-09-27T20:01:10Z</time></trkpt>
+      <trkpt lat="-33.89784" lon="151.180"><ele>92</ele><time>2026-09-27T20:01:20Z</time></trkpt>
+      <trkpt lat="-33.89757" lon="151.180"><ele>91</ele><time>2026-09-27T20:01:30Z</time></trkpt>
+      <trkpt lat="-33.89730" lon="151.180"><ele>90</ele><time>2026-09-27T20:01:40Z</time></trkpt>
+      <trkpt lat="-33.89703" lon="151.180"><ele>91</ele><time>2026-09-27T20:01:50Z</time></trkpt>
+      <trkpt lat="-33.89676" lon="151.180"><ele>92</ele><time>2026-09-27T20:02:00Z</time></trkpt>
+      <trkpt lat="-33.89649" lon="151.180"><ele>93</ele><time>2026-09-27T20:02:10Z</time></trkpt>
+      <trkpt lat="-33.89622" lon="151.180"><ele>94</ele><time>2026-09-27T20:02:20Z</time></trkpt>
+      <trkpt lat="-33.89595" lon="151.180"><ele>95</ele><time>2026-09-27T20:02:30Z</time></trkpt>
+      <trkpt lat="-33.89568" lon="151.180"><ele>96</ele><time>2026-09-27T20:02:40Z</time></trkpt>
+      <trkpt lat="-33.89541" lon="151.180"><ele>97</ele><time>2026-09-27T20:02:50Z</time></trkpt>
+      <trkpt lat="-33.89514" lon="151.180"><ele>98</ele><time>2026-09-27T20:03:00Z</time></trkpt>
+      <trkpt lat="-33.89487" lon="151.180"><ele>99</ele><time>2026-09-27T20:03:10Z</time></trkpt>
+      <trkpt lat="-33.89460" lon="151.180"><ele>100</ele><time>2026-09-27T20:03:20Z</time></trkpt>
+    </trkseg>
+  </trk>
+</gpx>
