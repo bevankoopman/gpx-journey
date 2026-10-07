@@ -19,6 +19,10 @@
   // Raw: the summary is replaced wholesale, never mutated, and a long route must not become thousands of proxies.
   let view = $state.raw<View>({ kind: 'upload' });
   let dragging = $state(false);
+  // The postcode highlighted in both the list and the map (hover/focus), and the components that act on picks.
+  let highlighted = $state<string | null>(null);
+  let mapView: MapView | undefined = $state();
+  let postcodeList: PostcodeList | undefined = $state();
 
   // Fetch and index the postcode boundaries now, so they are usually ready by the time a file is chosen.
   onMount(prefetchPostcodes);
@@ -28,6 +32,7 @@
   async function handleFile(file: File) {
     const request = ++latest;
     view = { kind: 'analysing' };
+    highlighted = null;
     try {
       const gpxText = await file.text();
       const summary = await analyseInWorker(gpxText);
@@ -54,6 +59,7 @@
   }
 
   function newFile() {
+    highlighted = null;
     latest++;
     view = { kind: 'upload' };
   }
@@ -93,12 +99,28 @@
       <Analysing />
     {:else}
       <Figures summary={view.summary} onchoosetype={chooseType} />
-      <PostcodeList result={view.summary.postcodes} />
+      <PostcodeList
+        bind:this={postcodeList}
+        result={view.summary.postcodes}
+        {highlighted}
+        onhover={(code) => (highlighted = code)}
+        onselect={(code) => {
+          highlighted = code;
+          mapView?.zoomToPostcode(code);
+        }}
+      />
     {/if}
     <footer>{CREDITS}</footer>
   </aside>
   <div class="mapwrap">
     <MapView
+      bind:this={mapView}
+      {highlighted}
+      onhoverpostcode={(code) => (highlighted = code)}
+      onselectpostcode={(code) => {
+        highlighted = code;
+        postcodeList?.scrollToPostcode(code);
+      }}
       route={view.kind === 'result' ? view.summary.route : null}
       postcodes={view.kind === 'result' ? (view.summary.postcodes?.shapes ?? null) : null}
     />

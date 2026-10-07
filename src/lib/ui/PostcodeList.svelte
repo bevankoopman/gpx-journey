@@ -4,7 +4,36 @@
   import { POSTCODE_CAVEAT } from '../credits';
   import { km } from './format';
 
-  let { result }: { result: PostcodeResult | null } = $props();
+  let {
+    result,
+    highlighted = null,
+    onhover = () => {},
+    onselect = () => {},
+  }: {
+    result: PostcodeResult | null;
+    /** Postcode highlighted here and on the map. */
+    highlighted?: string | null;
+    onhover?: (code: string | null) => void;
+    onselect?: (code: string) => void;
+  } = $props();
+
+  let list: HTMLOListElement | undefined = $state();
+
+  /** Bring a postcode's row into view (when it is picked on the map). */
+  export function scrollToPostcode(code: string) {
+    const row = list?.querySelector<HTMLElement>(`[data-code="${code}"]`);
+    if (!row) return;
+    // On phones the pinned map covers the top of the page (the row's scroll-margin-top). Chrome's `nearest`
+    // treats a row half under the map as visible, so decide the alignment from the uncovered area ourselves.
+    const covered = parseFloat(getComputedStyle(row).scrollMarginTop) || 0;
+    if (covered === 0) {
+      row.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      return;
+    }
+    const { top, bottom } = row.getBoundingClientRect();
+    if (top < covered) row.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    else if (bottom > window.innerHeight) row.scrollIntoView({ block: 'end', behavior: 'smooth' });
+  }
 
   const longest = $derived(Math.max(1, ...(result?.passed.map((p) => p.distanceM) ?? [])));
 </script>
@@ -20,16 +49,28 @@
           — {km(result.outsideM)} km was outside any postcode (water){/if}.
       </p>
     {:else}
-      <ol>
+      <ol bind:this={list}>
         {#each result.passed as p, i (p.code)}
           <li>
-            <span class="n">{i + 1}</span>
-            <div>
-              <span class="code">{p.code}</span>
-              <span class="loc">{p.localities.join(', ')}</span>
-              <div class="bar" style:width="{(p.distanceM / longest) * 100}%"></div>
-            </div>
-            <span class="d">{km(p.distanceM)} km</span>
+            <!-- Hover or focus highlights the postcode on the map; click (or tap) zooms to it. -->
+            <button
+              type="button"
+              data-code={p.code}
+              class:hl={highlighted === p.code}
+              onmouseenter={() => onhover(p.code)}
+              onmouseleave={() => onhover(null)}
+              onfocus={() => onhover(p.code)}
+              onblur={() => onhover(null)}
+              onclick={() => onselect(p.code)}
+            >
+              <span class="n">{i + 1}</span>
+              <span class="body">
+                <span class="code">{p.code}</span>
+                <span class="loc">{p.localities.join(', ')}</span>
+                <span class="bar" style:width="{(p.distanceM / longest) * 100}%"></span>
+              </span>
+              <span class="d">{km(p.distanceM)} km</span>
+            </button>
           </li>
         {/each}
       </ol>
@@ -54,13 +95,30 @@
     margin: 0;
     padding: 0;
   }
-  li {
+  button {
     display: grid;
     grid-template-columns: 22px 1fr auto;
     gap: 8px;
     align-items: center;
+    width: 100%;
     padding: 7px 6px;
+    border: 0;
     border-radius: 8px;
+    background: none;
+    color: inherit;
+    text-align: left;
+  }
+  button.hl {
+    background: #e7f1fb;
+  }
+  /* Phone: the map is pinned over the top 45vh, so rows scrolled into view must land below it. */
+  @media (max-width: 720px) {
+    button {
+      scroll-margin-top: calc(45vh + 8px);
+    }
+  }
+  .body {
+    display: block;
   }
   .n {
     font-size: 11px;
@@ -75,6 +133,7 @@
     color: var(--muted);
   }
   .bar {
+    display: block;
     height: 3px;
     background: var(--postcode);
     border-radius: 2px;

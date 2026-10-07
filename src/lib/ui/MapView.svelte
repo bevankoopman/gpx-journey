@@ -18,10 +18,17 @@
   let {
     route = null,
     postcodes = null,
+    highlighted = null,
+    onhoverpostcode = () => {},
+    onselectpostcode = () => {},
   }: {
     route?: readonly LonLat[] | null;
     /** Boundaries of the postcodes passed through, shaded under the route. */
     postcodes?: FeatureCollection<Polygon | MultiPolygon, { code: string }> | null;
+    /** Postcode highlighted here and in the list. */
+    highlighted?: string | null;
+    onhoverpostcode?: (code: string | null) => void;
+    onselectpostcode?: (code: string) => void;
   } = $props();
 
   const STYLE_URL = 'https://tiles.openfreemap.org/styles/positron';
@@ -72,18 +79,25 @@
 
     m.once('load', () => {
       fold();
-      m.addSource('postcodes', { type: 'geojson', data: EMPTY });
+      m.addSource('postcodes', { type: 'geojson', data: EMPTY, promoteId: 'code' });
       m.addLayer({
         id: 'postcode-fill',
         type: 'fill',
         source: 'postcodes',
-        paint: { 'fill-color': POSTCODE_COLOUR, 'fill-opacity': 0.1 },
+        paint: {
+          'fill-color': POSTCODE_COLOUR,
+          'fill-opacity': ['case', ['boolean', ['feature-state', 'hl'], false], 0.35, 0.1],
+        },
       });
       m.addLayer({
         id: 'postcode-line',
         type: 'line',
         source: 'postcodes',
-        paint: { 'line-color': POSTCODE_COLOUR, 'line-width': 1, 'line-opacity': 0.7 },
+        paint: {
+          'line-color': POSTCODE_COLOUR,
+          'line-width': ['case', ['boolean', ['feature-state', 'hl'], false], 2.5, 1],
+          'line-opacity': 0.7,
+        },
       });
       m.addLayer({
         id: 'postcode-label',
@@ -112,6 +126,21 @@
           'circle-stroke-width': 3,
         },
       });
+      // Hovering shading highlights it (and its row); clicking or tapping picks it.
+      const codeAt = (e: { features?: { properties: Record<string, unknown> }[] }) =>
+        e.features?.[0]?.properties.code as string | undefined;
+      m.on('mousemove', 'postcode-fill', (e) => {
+        m.getCanvas().style.cursor = 'pointer';
+        onhoverpostcode(codeAt(e) ?? null);
+      });
+      m.on('mouseleave', 'postcode-fill', () => {
+        m.getCanvas().style.cursor = '';
+        onhoverpostcode(null);
+      });
+      m.on('click', 'postcode-fill', (e) => {
+        const code = codeAt(e);
+        if (code) onselectpostcode(code);
+      });
       loaded = true;
     });
 
@@ -127,6 +156,28 @@
     if (!loaded || !map) return;
     map.getSource<GeoJSONSource>('postcodes')?.setData(postcodes ?? EMPTY);
   });
+
+  // Mirror the shared highlight onto the shading.
+  let shown: string | null = null;
+  $effect(() => {
+    if (!loaded || !map || !map.getSource('postcodes')) return;
+    if (shown && shown !== highlighted)
+      map.setFeatureState({ source: 'postcodes', id: shown }, { hl: false });
+    if (highlighted) map.setFeatureState({ source: 'postcodes', id: highlighted }, { hl: true });
+    shown = highlighted;
+  });
+
+  /** Fit the view to one of the shaded postcodes. */
+  export function zoomToPostcode(code: string) {
+    const shape = postcodes?.features.find((f) => f.properties.code === code);
+    if (!map || !shape) return;
+    const g = shape.geometry;
+    const points = (g.type === 'Polygon' ? g.coordinates : g.coordinates.flat()).flat();
+    const [lon, lat] = points[0] ?? [];
+    if (lon === undefined || lat === undefined) return;
+    const bounds = points.reduce((b, [x, y]) => b.extend([x!, y!]), new LngLatBounds([lon, lat], [lon, lat]));
+    map.fitBounds(bounds, { padding: 60, maxZoom: 16, duration: 600 });
+  }
 
   // Draw the route, or clear it and return to Australia, whenever it changes once the style is ready.
   $effect(() => {
